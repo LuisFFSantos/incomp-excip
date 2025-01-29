@@ -15,7 +15,7 @@ def load_data():
 def search_incompatibilities(data, excipient, functional_group):
     results = data
     if excipient:
-        results = results[results['Excipientes'].str.contains(excipient, case=False, na=False)]
+        results = results[results['Excipiente'].str.contains(excipient, case=False, na=False)]
     if functional_group:
         results = results[results['Grupo funcional'].str.contains(functional_group, case=False, na=False)]
     return results
@@ -34,7 +34,12 @@ def clear_fields():
     st.session_state["functional_group"] = ""
 
 # Configuração do Streamlit
-st.set_page_config(page_title="Consulta de Incompatibilidade de Excipientes", layout="wide")
+st.set_page_config(
+    page_title="Consulta de Incompatibilidade de Excipientes",
+    page_icon="https://cdn-icons-png.flaticon.com/512/954/954591.png",
+    layout="wide"
+)
+
 
 # Título da aplicação com ícone de lupa
 st.markdown(
