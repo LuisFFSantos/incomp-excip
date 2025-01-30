@@ -2,6 +2,14 @@ import streamlit as st
 import pandas as pd
 from io import BytesIO
 
+# Configuração do Streamlit
+st.set_page_config(
+    page_title="Consulta de Incompatibilidade de Excipientes",
+    page_icon="https://cdn-icons-png.flaticon.com/512/954/954591.png",
+    layout="wide"
+)
+
+
 # Carregar a base de dados do Excel
 def load_data():
     try:
@@ -10,6 +18,14 @@ def load_data():
     except Exception as e:
         st.error(f"Erro ao carregar o arquivo: {e}")
         return None
+
+# Carregar os dados e exibir informações para depuração
+data = load_data()
+
+# Exibir informações para depuração após carregar os dados
+if data is not None:
+    st.write("Colunas disponíveis na base de dados:", list(data.columns))
+    st.write("Primeira linha da base de dados:", data.head(1))
 
 # Função para buscar incompatibilidades
 def search_incompatibilities(data, excipient, functional_group):
@@ -32,13 +48,6 @@ def export_to_excel(df):
 def clear_fields():
     st.session_state["excipient"] = ""
     st.session_state["functional_group"] = ""
-
-# Configuração do Streamlit
-st.set_page_config(
-    page_title="Consulta de Incompatibilidade de Excipientes",
-    page_icon="https://cdn-icons-png.flaticon.com/512/954/954591.png",
-    layout="wide"
-)
 
 
 # Título da aplicação com ícone de lupa
