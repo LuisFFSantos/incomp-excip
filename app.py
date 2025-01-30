@@ -20,12 +20,12 @@ def load_data():
         return None
 
 # Carregar os dados e exibir informações para depuração
-data = load_data()
+#data = load_data()
 
 # Exibir informações para depuração após carregar os dados
-if data is not None:
-    st.write("Colunas disponíveis na base de dados:", list(data.columns))
-    st.write("Primeira linha da base de dados:", data.head(1))
+#if data is not None:
+    #st.write("Colunas disponíveis na base de dados:", list(data.columns))
+    #st.write("Primeira linha da base de dados:", data.head(1))
 
 # Função para buscar incompatibilidades
 def search_incompatibilities(data, excipient, functional_group):
