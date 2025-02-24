@@ -7,7 +7,7 @@ import app_search  # Importando o arquivo app.py
 
 # Configuração do Streamlit
 st.set_page_config(
-    page_title="Consulta de Incompatibilidade e Informações de Excipientes",
+    page_title="Consulta de Incompatibilidade de Excipientes",
     page_icon="https://cdn-icons-png.flaticon.com/512/954/954591.png",
     layout="wide"
 )
@@ -92,45 +92,53 @@ def export_to_excel(df):
 def clear_fields():
     st.session_state["excipient"] = ""
     st.session_state["functional_group"] = ""
+    st.session_state["excipient_function"] = ""
     st.session_state["excipient_handbook"] = ""
 
 # Título da aplicação
 st.markdown(
     """<h1 style="display: flex; align-items: center; gap: 10px;">
     <img src="https://cdn-icons-png.flaticon.com/512/954/954591.png" alt="Ícone de Lupa" style="width: 40px; height: 40px;">
-    Consulta de Incompatibilidade e Informações de Excipientes
+    Desenvolvimento Racional de Formulações 
     </h1>""",
     unsafe_allow_html=True
 )
 
 # Sidebar
 st.sidebar.title("Menu de Navegação")
-tab = st.sidebar.radio("Selecione uma opção:", ("Levantamento", "Conteúdo Handbook", "Artigos Científicos"))
+tab = st.sidebar.radio("Selecione uma opção:", ("💊 Consulta de Incompatibilidade", "📘 Conteúdo Handbook", "🔬 Artigos Científicos"))
 
 # Carregar dados
 excel_data = load_excel_data()
 handbook_data = load_handbook_data()
 
 # Aba de Levantamento
-if tab == "Levantamento":
-    st.subheader("Consulta de Dados do Excel")
+if tab == "💊 Consulta de Incompatibilidade":
+    st.subheader("Consulta das Informações")
 
-    col1, col2 = st.columns(2)
+    # Adicionando mais um filtro
+    col1, col2, col3 = st.columns(3)
     with col1:
         excipient_query = st.text_input("Digite o excipiente que deseja consultar:", key="excipient")
     with col2:
         functional_group_query = st.text_input("Digite o grupo funcional que deseja consultar:", key="functional_group")
+    with col3:
+        excipient_function_query = st.text_input("Digite a função do excipiente:", key="excipient_function")
 
-    if st.button("Buscar no Excel", key="search_excel"):
+    if st.button("Buscar", key="search_excel"):
         if not excel_data.empty:
             results = excel_data.copy()
+
+            # Aplicando os filtros progressivamente
             if excipient_query:
                 results = results[results['Excipiente'].str.contains(excipient_query, case=False, na=False)]
             if functional_group_query:
                 results = results[results['Grupo funcional'].str.contains(functional_group_query, case=False, na=False)]
+            if excipient_function_query:
+                results = results[results['Classificação do excipiente'].str.contains(excipient_function_query, case=False, na=False)]
 
             if not results.empty:
-                st.subheader("Resultados da Pesquisa (Excel)")
+                st.subheader("Resultados da Pesquisa")
                 st.dataframe(results)
                 st.download_button(
                     label="Exportar para Excel",
@@ -139,14 +147,15 @@ if tab == "Levantamento":
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
             else:
-                st.warning("Nenhuma incompatibilidade encontrada no Excel.")
+                st.warning("Nenhuma incompatibilidade encontrada.")
         else:
             st.warning("Arquivo Excel não carregado ou vazio.")
 
     st.button("Limpar Pesquisa", on_click=clear_fields, key="clear_button_excel")
 
+
 # Aba de Conteúdo do Handbook
-elif tab == "Conteúdo Handbook":
+elif tab == "📘 Conteúdo Handbook":
     if handbook_data is not None:
         st.subheader("Consulta de Dados do Handbook")
 
@@ -185,8 +194,5 @@ elif tab == "Conteúdo Handbook":
         st.button("Limpar Pesquisa", on_click=clear_fields, key="clear_button_handbook")
         
 # Aba de Artigos Científicos
-elif tab == "Artigos Científicos":
+elif tab == "🔬 Artigos Científicos":
     app_search.run_article_search()
-
-
-
