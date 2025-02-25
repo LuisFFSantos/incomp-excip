@@ -25,7 +25,7 @@ def run_article_search():
     api_options = ["Semantic Scholar", "CORE", "PubMed", "Todos"]
 
     # Inicializando a sessão de estado para armazenar os valores dos campos
-    if "results" not in st.session_state or not isinstance(st.session_state.results, pd.DataFrame):
+    if "results" not in st.session_state:
         st.session_state.results = pd.DataFrame()
     if "excipient" not in st.session_state:
         st.session_state.excipient = ""
@@ -65,7 +65,7 @@ def run_article_search():
 
         response = requests.get(url)
         if response.status_code != 200:
-            return pd.DataFrame()  # Retorna um DataFrame vazio
+            return []
 
         data = response.json()
         results = []
@@ -83,7 +83,7 @@ def run_article_search():
                 "Resumo": paper.get("abstract", "Resumo não disponível")
             })
 
-        return pd.DataFrame(results)  # Garante que sempre retorna um DataFrame
+        return pd.DataFrame(results)  # Retornar diretamente como DataFrame
 
     # Botão de busca
     if st.button("Buscar"):
@@ -92,12 +92,6 @@ def run_article_search():
         else:
             with st.spinner("Buscando artigos..."):
                 st.session_state.results = search_semantic_scholar(st.session_state.excipient, search_options[st.session_state.search_type])
-
-                if isinstance(st.session_state.results, list):  
-                    st.session_state.results = pd.DataFrame(st.session_state.results)  # Converte lista em DataFrame
-
-                if not isinstance(st.session_state.results, pd.DataFrame):
-                    st.session_state.results = pd.DataFrame()  # Garante um DataFrame válido
 
                 if st.session_state.sort_by == "Ano" and not st.session_state.results.empty:
                     st.session_state.results = st.session_state.results.sort_values(by="Ano", ascending=False)
