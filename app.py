@@ -22,6 +22,19 @@ def load_excel_data():
         st.error(f"Erro ao carregar o arquivo Excel: {e}")
         return pd.DataFrame()
 
+# Função para colorir a coluna "Score"
+def highlight_score(value):
+    colors = {
+        0: "background-color: #2ECC71; color: white;",  # Verde
+        1: "background-color: #3498DB; color: white;",  # Azul
+        2: "background-color: #F1C40F; color: black;",  # Amarelo
+        3: "background-color: #E74C3C; color: white;"   # Vermelho
+    }
+    try:
+        return colors.get(int(value), "")  # Converte para inteiro antes de buscar a cor
+    except ValueError:
+        return ""
+
 @st.cache_data
 def translate_text(text, target_lang='pt'):
     try:
@@ -137,15 +150,27 @@ if tab == "💊 Consulta de Incompatibilidade":
             if excipient_function_query:
                 results = results[results['Classificação do excipiente'].str.contains(excipient_function_query, case=False, na=False)]
 
+            # Aplicar estilos à coluna "Score"
             if not results.empty:
                 st.subheader("Resultados da Pesquisa")
-                st.dataframe(results)
+
+                # Aplicar estilos à coluna "Score" se existir
+                if "Score" in results.columns:
+                    results["Score"] = results["Score"].fillna(0).astype(int)  # Tratar valores nulos
+                    styled_results = results.style.applymap(highlight_score, subset=["Score"])
+                    st.dataframe(styled_results)  # Exibir apenas o DataFrame estilizado
+                else:
+                    st.dataframe(results)  # Exibir o DataFrame sem estilos caso "Score" não exista
+
+                # Baixar os resultados sem duplicação
+                excel_data = export_to_excel(results)
                 st.download_button(
                     label="Exportar para Excel",
-                    data=export_to_excel(results),
+                    data=excel_data,
                     file_name="resultados_excel.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
+
             else:
                 st.warning("Nenhuma incompatibilidade encontrada.")
         else:
